@@ -151,7 +151,7 @@ def astar(maze):
 
 
 def stage2_heuristic(cur, end, visit):
-    min_value = 1e9+7
+    min_value = float("inf")
     for idx,end_point in enumerate(end):
         if not visit[idx]:
             min_value = min(min_value,manhatten_dist(cur,end_point.location))
