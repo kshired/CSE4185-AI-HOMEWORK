@@ -109,15 +109,8 @@ def astar(maze):
     open = []
     close = []
     hq.heappush(open,start)
-    #open.append(start)
 
     while open:
-        # cur_node = open[0]
-        # for value in open:
-        #     if value < cur_node:
-        #         cur_node = value
-        
-        # open.remove(cur_node)
         cur_node = hq.heappop(open)
         close.append(cur_node)
 
@@ -129,14 +122,6 @@ def astar(maze):
             break
         
         children = []
-
-        # for d in dir :
-        #     new_pos = list(cur_node.location)
-        #     new_pos[0],new_pos[1] = new_pos[0] + d[0], new_pos[1] + d[1]
-
-        #     if maze.choose_move(new_pos[0],new_pos[1]):
-        #         new_node = Node(cur_node,tuple(new_pos))
-        #         children.append(new_node)
 
         for dy,dx in maze.neighborPoints(cur_node.location[0],cur_node.location[1]):
             new_node = Node(cur_node,(dy,dx))
@@ -165,8 +150,12 @@ def astar(maze):
 
 
 
-def stage2_heuristic():
-    pass
+def stage2_heuristic(cur, end, visit):
+    min_value = 1e9+7
+    for idx,end_point in enumerate(end):
+        if not visit[idx]:
+            min_value = min(min_value,manhatten_dist(cur,end_point.location))
+    return min_value
 
 
 def astar_four_circles(maze):
@@ -181,26 +170,72 @@ def astar_four_circles(maze):
     path=[]
 
     ####################### Write Your Code Here ################################
+    start_point = maze.startPoint()
 
+    start = Node(None, start_point)
+    end = [Node(None, end_point) for end_point in end_points]
+    visit = [False for _ in range(len(end_points))]
 
+    for _ in range(4):
+        open = []
+        close = []
+        if len(path) != 0:
+            hq.heappush(open,Node(None,path[-1]))
+        else:
+            hq.heappush(open,start)
+        while open:
+            cur_node = hq.heappop(open)
+            close.append(cur_node)
 
+            if cur_node in end:
+                if not visit[end.index(cur_node)]: 
+                    visit[end.index(cur_node)] = True
+                    cur = cur_node
+                    tmp = []
+                    while cur:
+                        tmp.append(cur.location)
+                        cur = cur.parent
+                    path = path[:-1] + tmp[::-1]
+                    break
 
+            children = []
 
+            for dy,dx in maze.neighborPoints(cur_node.location[0],cur_node.location[1]):
+                new_node = Node(cur_node,(dy,dx))
+                children.append(new_node)
 
+            for child in children:
+                if child in close:
+                    continue
+                child.g = cur_node.g + 1
+                child.h = stage2_heuristic(child.location, end, visit)
+                child.f = child.g + child.h
 
+                for value in open:
+                    if child == value and child > value:
+                        break
+                else:
+                    hq.heappush(open,child)
 
+    # def isNeighbor(pos1,pos2):
+    #     if abs(pos1[0] - pos2[0]) == 0 and abs(pos1[1]-pos2[1]) == 1:
+    #         return True
+    #     elif abs(pos1[0] - pos2[0]) == 1 and abs(pos1[1]-pos2[1]) == 0:
+    #         return True
+    #     return False
 
+    # dir = [(0,1),(1,0),(-1,0),(0,-1)]
 
+    # tmp = path[0]
+    # cnt = 0
+    # for y,x in path[1:]:
+    #     dy,dx = tmp
+    #     if not isNeighbor((y,x),(dy,dx)):
+    #         cnt += 1
+    #     tmp = (y,x)
 
-
-
-
-
-
-
-
+    # print(cnt)
     return path
-
     ############################################################################
 
 
