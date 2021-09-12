@@ -197,24 +197,20 @@ def astar_four_circles(maze):
                     path = path[:-1] + tmp[::-1]
                     break
 
-            children = []
 
             for dy,dx in maze.neighborPoints(cur_node.location[0],cur_node.location[1]):
                 new_node = Node(cur_node,(dy,dx))
-                children.append(new_node)
-
-            for child in children:
-                if child in close:
+                if new_node in close:
                     continue
-                child.g = cur_node.g + 1
-                child.h = stage2_heuristic(child.location, end, visit)
-                child.f = child.g + child.h
+                new_node.g = cur_node.g + 1
+                new_node.h = stage2_heuristic(new_node.location, end ,visit)
+                new_node.f = new_node.g + new_node.h
 
                 for value in open:
-                    if child == value and child > value:
+                    if new_node == value and new_node > value:
                         break
                 else:
-                    hq.heappush(open,child)
+                    hq.heappush(open,new_node)
 
     isValidPath(path)
     return path
