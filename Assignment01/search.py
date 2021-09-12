@@ -122,24 +122,21 @@ def astar(maze):
                 cur = cur.parent
             break
         
-        children = []
 
         for dy,dx in maze.neighborPoints(cur_node.location[0],cur_node.location[1]):
             new_node = Node(cur_node,(dy,dx))
-            children.append(new_node)
-
-        for child in children:
-            if child in close:
+            if new_node in close:
                 continue
-            child.g = cur_node.g + 1
-            child.h = manhatten_dist(child.location, end.location)
-            child.f = child.g + child.h
+            new_node.g = cur_node.g + 1
+            new_node.h = manhatten_dist(new_node.location, end.location)
+            new_node.f = new_node.g + new_node.h
 
             for value in open:
-                if child == value and child > value:
+                if new_node == value and new_node > value:
                     break
             else:
-                hq.heappush(open,child)
+                hq.heappush(open,new_node)
+
                 
     path = path[::-1]
     isValidPath(path)
