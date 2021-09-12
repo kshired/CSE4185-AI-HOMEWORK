@@ -51,6 +51,7 @@ def bfs(maze):
         node = prev[node]
         path.append(node)
 
+    isValidPath(path)
     return path[::-1]
     ############################################################################
 
@@ -141,6 +142,7 @@ def astar(maze):
                 hq.heappush(open,child)
                 
     path = path[::-1]
+    isValidPath(path)
     return path
 
     ############################################################################
@@ -217,24 +219,7 @@ def astar_four_circles(maze):
                 else:
                     hq.heappush(open,child)
 
-    # def isNeighbor(pos1,pos2):
-    #     if abs(pos1[0] - pos2[0]) == 0 and abs(pos1[1]-pos2[1]) == 1:
-    #         return True
-    #     elif abs(pos1[0] - pos2[0]) == 1 and abs(pos1[1]-pos2[1]) == 0:
-    #         return True
-    #     return False
-
-    # dir = [(0,1),(1,0),(-1,0),(0,-1)]
-
-    # tmp = path[0]
-    # cnt = 0
-    # for y,x in path[1:]:
-    #     dy,dx = tmp
-    #     if not isNeighbor((y,x),(dy,dx)):
-    #         cnt += 1
-    #     tmp = (y,x)
-
-    # print(cnt)
+    isValidPath(path)
     return path
     ############################################################################
 
@@ -305,3 +290,21 @@ def astar_many_circles(maze):
     return path
 
     ############################################################################
+def isNeighbor(pos1,pos2):
+    if abs(pos1[0] - pos2[0]) == 0 and abs(pos1[1]-pos2[1]) == 1:
+        return True
+    elif abs(pos1[0] - pos2[0]) == 1 and abs(pos1[1]-pos2[1]) == 0:
+        return True
+    return False
+
+def isValidPath(path):
+    tmp = path[0]
+    cnt = 0
+    for y,x in path[1:]:
+        dy,dx = tmp
+        if not isNeighbor((y,x),(dy,dx)):
+            cnt += 1
+        tmp = (y,x)
+
+    if cnt:
+        raise ValueError("올바르지않은 경로로 이동하는 경우가 있습니다.")
