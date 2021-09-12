@@ -1,3 +1,5 @@
+# AI Assignment01 보고서
+
 ```
 AI Assignment01 보고서
 학번 : 20171612
@@ -174,6 +176,71 @@ def astar(maze):
 
 **Stage 2의 최단 경로 탐색을위한 A\* 알고리즘 구현문제.**
 
+```python
+def stage2_heuristic(cur, end, visit):
+    min_value = float("inf")
+    for idx,end_point in enumerate(end):
+        if not visit[idx]:
+            min_value = min(min_value,manhatten_dist(cur,end_point.location))
+    return min_value
+
+def astar_four_circles(maze):
+    """
+    [문제 03] 제시된 stage2의 맵 세가지를 A* Algorithm을 통해 최단 경로를 return하시오.(30점)
+    (단 Heurstic Function은 위의 stage2_heuristic function을 직접 정의하여 사용해야 한다.)
+    """
+
+    end_points=maze.circlePoints()
+    end_points.sort()
+
+    path=[]
+
+    ####################### Write Your Code Here ################################
+    start_point = maze.startPoint()
+
+    start = Node(None, start_point)
+    end = [Node(None, end_point) for end_point in end_points]
+    visit = [False for _ in range(len(end_points))]
+
+    for _ in range(4):
+        open = []
+        close = []
+        if len(path) != 0:
+            hq.heappush(open,Node(None,path[-1]))
+        else:
+            hq.heappush(open,start)
+        while open:
+            cur_node = hq.heappop(open)
+            close.append(cur_node)
+
+            if cur_node in end:
+                if not visit[end.index(cur_node)]:
+                    visit[end.index(cur_node)] = True
+                    cur = cur_node
+                    tmp = []
+                    while cur:
+                        tmp.append(cur.location)
+                        cur = cur.parent
+                    path = path[:-1] + tmp[::-1]
+                    break
+
+            for dy,dx in maze.neighborPoints(cur_node.location[0],cur_node.location[1]):
+                new_node = Node(cur_node,(dy,dx))
+                if new_node in close:
+                    continue
+                new_node.g = cur_node.g + 1
+                new_node.h = stage2_heuristic(new_node.location, end ,visit)
+                new_node.f = new_node.g + new_node.h
+
+                for value in open:
+                    if new_node == value and new_node > value:
+                        break
+                else:
+                    hq.heappush(open,new_node)
+
+    return path
+```
+
 ### 사용한 라이브러리 및 자료구조
 
 - `heapq` 라이브러리
@@ -216,14 +283,14 @@ def astar(maze):
 
 `stage2_heuristic(cur:tuple, end:list[tuple], visit:list[bool]) -> int`
 
+방문하지 않은 도착 좌표 중 현재 좌표와의 맨해튼 거리 중 가장 작은 값을 반환하는 휴리스틱 함수입니다.
+
 - `cur`
   - 현재 좌표
 - `end`
   - 도착 좌표들을 가지고 있는 리스트
 - `visit`
   - 도착 좌표들을 이미 방문했는지 체크하기 위한 리스트
-
-방문하지 않은 도착 좌표 중 현재 좌표와의 맨해튼 거리 중 가장 작은 값을 반환하는 휴리스틱 함수입니다.
 
 ### 경로 구하기
 
