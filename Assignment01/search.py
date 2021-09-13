@@ -221,10 +221,15 @@ def astar_four_circles(maze):
 # -------------------- Stage 03: Many circles - A* Algorithm -------------------- #
 
 def mst(start, objectives):
+    '''
+    방문하지 않은 objectives와 현재 노드를 합쳐 mst를 만든다
+    각각의 edge들의 weight는 각 edge에서 다른 edge까지의 mahatten 거리를 사용
+    mst는 prim 알고리즘을 통해 구현
+    '''
 
     cost_sum=0
     ####################### Write Your Code Here ################################
-    # 방문하지 않은 objectives와 현재 노드를 합쳐 mst를 만든다
+    
     graph = defaultdict(list)
 
     for y1,x1 in objectives:
