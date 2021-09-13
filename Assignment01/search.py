@@ -1,5 +1,5 @@
 ###### Write Your Library Here ###########
-from collections import deque
+from collections import defaultdict, deque
 import heapq as hq
 #########################################
 
@@ -220,31 +220,54 @@ def astar_four_circles(maze):
 
 # -------------------- Stage 03: Many circles - A* Algorithm -------------------- #
 
-def mst(objectives, edges):
+def mst(start, objectives):
 
     cost_sum=0
     ####################### Write Your Code Here ################################
+    # 방문하지 않은 objectives와 현재 노드를 합쳐 mst를 만든다
+    graph = defaultdict(list)
 
+    for y1,x1 in objectives:
+        for y2,x2 in objectives:
+            if y1 == y2 and x1 == x2:
+                continue
+            weight = manhatten_dist((y1,x1),(y2,x2))
+            graph[(y1,x1)].append((weight, (y2,x2)))
+            graph[(y2,x2)].append((weight, (y1,x1)))
+    
+    for y,x in objectives:
+        weight = manhatten_dist(start,(y,x))
+        graph[(y,x)].append((weight,start))
+        graph[start].append((weight,(y,x)))
 
+    connected = set([start])
+    candidate_edge = graph[start]
+    hq.heapify(candidate_edge)
+    
+    while candidate_edge:
+        w, v = hq.heappop(candidate_edge)
+        if v not in connected:
+            connected.add(v)
+            cost_sum += w
 
-
-
-
-
-
-
-
-
-
+            for edge in graph[v]:
+                if edge[1] not in connected:
+                    hq.heappush(candidate_edge,edge)
 
     return cost_sum
 
     ############################################################################
 
 
-def stage3_heuristic():
-    pass
-
+def stage3_heuristic(cur, objectives, visit):
+    # cur_node에서 end_node까지 가는 mst를 구축하여, cost_sum을 반환
+    not_visit_objectives = []
+    
+    for idx, objective in enumerate(objectives):
+        if not visit[idx]:
+            not_visit_objectives.append(objective.location)
+    
+    return mst(cur,not_visit_objectives)
 
 def astar_many_circles(maze):
     """
@@ -259,27 +282,50 @@ def astar_many_circles(maze):
     path=[]
 
     ####################### Write Your Code Here ################################
+    start_point = maze.startPoint()
+
+    start = Node(None, start_point)
+    end = [Node(None, end_point) for end_point in end_points]
+    visit = [False for _ in range(len(end_points))]
+
+    while visit.count(True) < len(visit):
+        open = []
+        close = []
+        if len(path) != 0:
+            hq.heappush(open,Node(None,path[-1]))
+        else:
+            hq.heappush(open,start)
+        while open:
+            cur_node = hq.heappop(open)
+            close.append(cur_node)
+
+            if cur_node in end:
+                if not visit[end.index(cur_node)]: 
+                    visit[end.index(cur_node)] = True
+                    cur = cur_node
+                    tmp = []
+                    while cur:
+                        tmp.append(cur.location)
+                        cur = cur.parent
+                    path = path[:-1] + tmp[::-1]
+                    break
 
 
+            for dy,dx in maze.neighborPoints(cur_node.location[0],cur_node.location[1]):
+                new_node = Node(cur_node,(dy,dx))
+                if new_node in close:
+                    continue
+                new_node.g = cur_node.g + 1
+                new_node.h = stage3_heuristic(new_node.location, end ,visit)
+                new_node.f = new_node.g + new_node.h
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                for value in open:
+                    if new_node == value and new_node > value:
+                        break
+                else:
+                    hq.heappush(open,new_node)
+                    
+    isValidPath(path)
     return path
 
     ############################################################################
