@@ -165,13 +165,20 @@ def astar(maze):
 
 
 
-def stage2_heuristic(cur, end, visit):
-    # 현재 좌표에서 방문하지 않은 좌표들과의 맨해튼 거리 중 가장 작은 맨해튼 거리를 return
-    min_value = float("inf")
-    for idx,end_point in enumerate(end):
-        if not visit[idx]:
-            min_value = min(min_value,manhatten_dist(cur,end_point.location))
-    return min_value
+def stage2_heuristic(cur, end):
+    '''
+    max_value = 현재 좌표에서 방문하지 않은 좌표들과의 맨해튼 거리 중 가장 큰 맨해튼 거리
+    m = 맨해튼 거리를 기반으로 구한 mst의 weight 합
+
+    max_value + m 을 return
+    '''
+    max_value = 0
+    m = mst(cur,[objective.location for objective in end])
+    
+    for end_point in end:
+        max_value = max(max_value,manhatten_dist(cur,end_point.location))
+
+    return max_value + m
 
 
 def astar_four_circles(maze):
@@ -190,60 +197,37 @@ def astar_four_circles(maze):
 
     # Start Node and End Nodes (Objectives)
     start = Node(None, start_point)
+
     end = [Node(None, end_point) for end_point in end_points]
+    end_locations = [end_point for end_point in end_points]
+    start.obj = end[:]
 
-    # 도착 좌표를 방문했는지 체크하기위한 visit 배열
-    visit = [False for _ in range(len(end_points))]
+    open = [start]
+    while True:
+        cur_node = hq.heappop(open)
 
-    for _ in range(4):
-        # Initialize Open and Close List at every iteration
-        open = []
-        close = []
+        if cur_node.location in end_locations:
+            if Node(None,cur_node.location) in cur_node.obj:
+                idx = cur_node.obj.index(Node(None,cur_node.location))
+                cur_node.obj.pop(idx)
 
-        # iteration이 처음인 경우 == 여태까지 구한 path가 없는 경우
-        if len(path) != 0:
-            hq.heappush(open,Node(None,path[-1]))
-        else:   # 구한 path가 있다면, 마지막 지점부터 다시 시작
-            hq.heappush(open,start)
-
-        # A*
-        while open:
-            cur_node = hq.heappop(open)
-            close.append(cur_node)
-
-            # 현재 좌표가 도착 좌표들 중 하나라면 path를 추가
-            if cur_node in end:
-                if not visit[end.index(cur_node)]: 
-                    # 도착 좌표를 방문했다고 체크
-                    visit[end.index(cur_node)] = True
-
-                    # Path Trace
-                    cur = cur_node
-                    tmp = []
-                    while cur:
-                        tmp.append(cur.location)
-                        cur = cur.parent
-                    
-                    # i-1번째 iteration의 마지막 좌표 ==  i번째 iteration의 첫 좌표
-                    # 그렇기에 이전 path에서 [:-1]까지 가져오고 현재 path(tmp)를 reverse하여 추가
-                    path = path[:-1] + tmp[::-1]
-                    break
-
-            
-            # Find Next Open Nodes
-            for dy,dx in maze.neighborPoints(cur_node.location[0],cur_node.location[1]):
-                new_node = Node(cur_node,(dy,dx))
-                if new_node in close:
-                    continue
-                new_node.g = cur_node.g + 1
-                new_node.h = stage2_heuristic(new_node.location, end ,visit) # heuristic == stage2_heuristic
-                new_node.f = new_node.g + new_node.h
-
-                for value in open:
-                    if new_node == value and new_node > value:
-                        break
-                else:
-                    hq.heappush(open,new_node)
+        if len(cur_node.obj) == 0:
+            cur = cur_node
+            tmp = []
+            while cur:
+                tmp.append(cur.location)
+                cur = cur.parent
+            path = tmp[::-1]
+            break
+    
+        
+        for dy,dx in maze.neighborPoints(cur_node.location[0],cur_node.location[1]):
+            new_node = Node(cur_node,(dy,dx))
+            new_node.obj = cur_node.obj[:]
+            new_node.g = cur_node.g + 1
+            new_node.h = stage2_heuristic(new_node.location, cur_node.obj)
+            if new_node not in open:
+                hq.heappush(open,new_node)
 
     # Check Path is valid
     isValidPath(path)
@@ -301,15 +285,19 @@ def mst(start, objectives):
     ############################################################################
 
 
-def stage3_heuristic(cur, objectives, visit):
-    # cur_node에서 end_node까지 가는 mst를 구축하여, cost_sum을 반환
-    not_visit_objectives = []
-    
-    for idx, objective in enumerate(objectives):
-        if not visit[idx]:
-            not_visit_objectives.append(objective.location)
-    
-    return mst(cur,not_visit_objectives)
+def stage3_heuristic(cur, start, objectives):
+    '''
+    mst = cur_node에서 end_node까지 가는 mst를 구축하여, cost_sum을 반환
+    max_value1 = 현재 좌표 ~ 방문하지 않은 좌표 사이의 거리중 가장 먼 거리
+    max_value2 = 최초 시작 좌표 ~ 방문하지 않은 좌표 사이의 거리중 가장 먼 거리
+    '''
+    max_value1 = 0
+    max_value2 = 0
+    for objective in objectives:
+        max_value1 = max(max_value1,manhatten_dist(cur,objective.location))
+        max_value2 = max(max_value2,manhatten_dist(start,objective.location))
+
+    return mst(cur,[objective.location for objective in objectives]) + max_value1 + max_value2
 
 def astar_many_circles(maze):
     """
@@ -328,63 +316,39 @@ def astar_many_circles(maze):
 
     # Start Node and End Nodes (Objectives)
     start = Node(None, start_point)
+    
+
     end = [Node(None, end_point) for end_point in end_points]
+    end_locations = [end_point for end_point in end_points]
+    start.obj = end[:]
 
-    # 도착 좌표를 방문했는지 체크하기위한 visit 배열
-    visit = [False for _ in range(len(end_points))]
+    open = [start]
+    while True:
+        cur_node = hq.heappop(open)
 
-    # 모든 도착 좌표를 방문하지 않았을 때까지 iteration
-    while visit.count(True) < len(visit):
-        # Initialize Open and Close List at every iteration
-        open = []
-        close = []
+        if cur_node.location in end_locations:
+            if Node(None,cur_node.location) in cur_node.obj:
+                idx = cur_node.obj.index(Node(None,cur_node.location))
+                cur_node.obj.pop(idx)
 
-        # iteration이 처음인 경우 == 여태까지 구한 path가 없는 경우
-        if len(path) != 0:
-            hq.heappush(open,Node(None,path[-1]))
-        else:   # 구한 path가 있다면, 마지막 지점부터 다시 시작
-            hq.heappush(open,start)
+        if len(cur_node.obj) == 0:
+            cur = cur_node
+            tmp = []
+            while cur:
+                tmp.append(cur.location)
+                cur = cur.parent
+            path = tmp[::-1]
+            break
+    
         
-        # A* 알고리즘
-        while open:
-            cur_node = hq.heappop(open)
-            close.append(cur_node)
+        for dy,dx in maze.neighborPoints(cur_node.location[0],cur_node.location[1]):
+            new_node = Node(cur_node,(dy,dx))
+            new_node.obj = cur_node.obj[:]
+            new_node.g = cur_node.g + 1
+            new_node.h = stage3_heuristic(new_node.location, start_point, cur_node.obj) # heurisitc == stage3_heuristic                new_node.f = new_node.g + new_node.h
 
-            # 현재 좌표가 도착 좌표들 중 하나라면 path를 추가
-            if cur_node in end:
-                if not visit[end.index(cur_node)]: 
-                    # 도착 좌표를 방문했다고 체크
-                    visit[end.index(cur_node)] = True
-
-                    # Path Trace
-                    cur = cur_node
-                    tmp = []
-                    while cur:
-                        tmp.append(cur.location)
-                        cur = cur.parent
-                    
-                    # i-1번째 iteration의 마지막 좌표 ==  i번째 iteration의 첫 좌표
-                    # 그렇기에 이전 path에서 [:-1]까지 가져오고 현재 path(tmp)를 reverse하여 추가
-                    path = path[:-1] + tmp[::-1]
-                    break
-
-            # Find Next Open Nodes
-            for dy,dx in maze.neighborPoints(cur_node.location[0],cur_node.location[1]):
-                new_node = Node(cur_node,(dy,dx))
-                if new_node in close:
-                    continue
-                new_node.g = cur_node.g + 1
-                new_node.h = stage3_heuristic(new_node.location, end ,visit) # heurisitc == stage3_heuristic
-                new_node.f = new_node.g + new_node.h
-
-                for value in open:
-                    if new_node == value and new_node > value:
-                        break
-                else:
-                    hq.heappush(open,new_node)
-                    
-    # Check Path is Valid
-    isValidPath(path)
+            if new_node not in open:
+                hq.heappush(open,new_node)
     return path
 
     ############################################################################
