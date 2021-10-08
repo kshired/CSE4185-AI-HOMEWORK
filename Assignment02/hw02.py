@@ -57,8 +57,8 @@ class MinimaxAgent(AdversialSearchAgent):
       }
     
     best = {
-      "score" : float("inf") if agent else float("-inf"),
-      "action" : None
+      "action" : None,
+      "score" : float("inf") if agent else float("-inf"),      
     }
 
     for action in state.getLegalActions(agent):
@@ -92,15 +92,15 @@ class AlphaBetaAgent(AdversialSearchAgent):
     (depth와 evaluation function은 위에서 정의한 self.depth and self.evaluationFunction을 사용할 것.)
   """
   def alpha_beta(self, state, depth, agent, maximize, alpha, beta):
-    if state.isWin() or state.isLose() or depth == self.depth:
+    if state.isWin() or state.isLose():# or depth == self.depth:
       return {
-        "action":None,
+        "action": None,
         "score": self.evaluationFunction(state)
       }
     
     best = {
+      "action" : None,
       "score" : float("inf") if agent else float("-inf"),
-      "action" : None
     }
 
     for action in state.getLegalActions(agent):
@@ -109,11 +109,8 @@ class AlphaBetaAgent(AdversialSearchAgent):
         score = self.alpha_beta(new_state, depth, 1, False, alpha, beta)["score"]
         best["action"], best["score"] = [(best["action"], best["score"]), (action, score)][score > best["score"]]
         alpha = max(alpha, best["score"])
-        if best["score"] >= beta:
-          return {
-            "action": None,
-            "score": best["score"],
-          }
+        if alpha >= beta:
+          break
       else:
         if agent == state.getNumAgents() - 1:
           score = self.alpha_beta(new_state, depth + 1, 0, True, alpha, beta)["score"]
@@ -121,13 +118,9 @@ class AlphaBetaAgent(AdversialSearchAgent):
           score = self.alpha_beta(new_state, depth, agent + 1, False, alpha, beta)["score"]
         best["score"] = min(score, best["score"])
         beta = min(beta, best["score"])
-        if alpha >= best["score"]:
-          return {
-            "action": None,
-            "score": best["score"],
-          }
-
-    return best
+        if alpha >= beta:
+          break
+      return best
 
   def Action(self, gameState):
     ####################### Write Your Code Here ################################
@@ -141,35 +134,40 @@ class ExpectimaxAgent(AdversialSearchAgent):
     [문제 03] Expectimax의 Action을 구현하시오. (25점)
     (depth와 evaluation function은 위에서 정의한 self.depth and self.evaluationFunction을 사용할 것.)
   """
+  def expactimax(self, state, depth, agent, maximize):
+    if state.isWin() or state.isLose():
+      return {
+        "action": None,
+        "score": self.evaluationFunction(state)
+      }
+    
+    best = {
+      "action" : None,
+      "score" : 0 if agent else float("-inf"),      
+    }
+
+    for action in state.getLegalActions(agent):
+      new_state = state.generateSuccessor(agent, action)
+      if maximize:
+        score = self.expactimax(new_state, depth, 1, False)["score"]
+        best["action"], best["score"] = [(best["action"], best["score"]), (action, score)][score > best["score"]]
+      else:
+        if agent >= state.getNumAgents() - 1:
+          if depth == self.depth - 1:
+            score = self.evaluationFunction(new_state)
+          else:
+            score = self.expactimax(new_state, depth + 1, 0, True)["score"]
+        else:
+          score = self.expactimax(new_state, depth, agent + 1, False)["score"]
+        best["score"] += score
+
+    if not maximize:
+      best["score"] /= len(state.getLegalActions(agent))
+    
+    return best
+    
+
   def Action(self, gameState):
     ####################### Write Your Code Here ################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    raise Exception("Not implemented yet")
-
+    return self.expactimax(gameState, 0 ,0, True)["action"]
     ############################################################################
