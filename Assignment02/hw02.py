@@ -50,22 +50,28 @@ class MinimaxAgent(AdversialSearchAgent):
     (depth와 evaluation function은 위에서 정의한 self.depth and self.evaluationFunction을 사용할 것.)
   """
   def minimax(self, state, depth, agent, maximize):
-    if state.isWin() or state.isLose()  or depth == self.depth:
+    # Check terminal state
+    if state.isWin() or state.isLose():
       return {
         "action": None,
         "score": self.evaluationFunction(state)
       }
     
-    best = {
+    # Init result
+    result = {
       "action" : None,
       "score" : float("inf") if agent else float("-inf"),      
     }
 
+    # Iterate children of node
     for action in state.getLegalActions(agent):
+      # Generate new state
       new_state = state.generateSuccessor(agent, action)
+      # Maximizing agent
       if maximize:
         score = self.minimax(new_state, depth, 1, False)["score"]
-        best["action"], best["score"] = [(best["action"], best["score"]), (action, score)][score > best["score"]]
+        result["action"], result["score"] = [(result["action"], result["score"]), (action, score)][score > result["score"]]
+      # Minimizing agent
       else:
         if agent >= state.getNumAgents() - 1:
           if depth == self.depth - 1:
@@ -74,12 +80,13 @@ class MinimaxAgent(AdversialSearchAgent):
             score = self.minimax(new_state, depth + 1, 0, True)["score"]
         else:
           score = self.minimax(new_state, depth, agent + 1, False)["score"]
-        best["score"] = min(score, best["score"])
+        result["score"] = min(score, result["score"])
 
-    return best
+    return result
 
   def Action(self, gameState):
   	# ####################### Write Your Code Here ################################
+    # Call minimax
     return self.minimax(gameState, 0 ,0, True)["action"]
     ############################################################################
 
@@ -92,38 +99,50 @@ class AlphaBetaAgent(AdversialSearchAgent):
     (depth와 evaluation function은 위에서 정의한 self.depth and self.evaluationFunction을 사용할 것.)
   """
   def alpha_beta(self, state, depth, agent, maximize, alpha, beta):
-    if state.isWin() or state.isLose():# or depth == self.depth:
+    # Check terminal state
+    if state.isWin() or state.isLose():
       return {
         "action": None,
         "score": self.evaluationFunction(state)
       }
     
-    best = {
+    # Init result
+    result = {
       "action" : None,
       "score" : float("inf") if agent else float("-inf"),
     }
 
+    # Iterate children of node
     for action in state.getLegalActions(agent):
+      # Generate new state
       new_state = state.generateSuccessor(agent, action)
+      # Maximizing agent
       if maximize:
         score = self.alpha_beta(new_state, depth, 1, False, alpha, beta)["score"]
-        best["action"], best["score"] = [(best["action"], best["score"]), (action, score)][score > best["score"]]
-        alpha = max(alpha, best["score"])
-        if alpha >= beta:
+        result["action"], result["score"] = [(result["action"], result["score"]), (action, score)][score > result["score"]]
+        alpha = max(alpha, result["score"])
+        # Pruning
+        if result["score"] >= beta:
           break
+      # Minimizing agent
       else:
         if agent == state.getNumAgents() - 1:
-          score = self.alpha_beta(new_state, depth + 1, 0, True, alpha, beta)["score"]
+          if depth == self.depth - 1:
+            score = self.evaluationFunction(new_state)
+          else:
+            score = self.alpha_beta(new_state, depth + 1, 0, True, alpha, beta)["score"]
         else:
           score = self.alpha_beta(new_state, depth, agent + 1, False, alpha, beta)["score"]
-        best["score"] = min(score, best["score"])
-        beta = min(beta, best["score"])
-        if alpha >= beta:
+        result["score"] = min(score, result["score"])
+        beta = min(beta, result["score"])
+        # Pruning
+        if alpha >= result["score"]:
           break
-      return best
+      return result
 
   def Action(self, gameState):
     ####################### Write Your Code Here ################################
+    # Call alpha beta
     return self.alpha_beta(gameState, 0 ,0, True, float("-inf"), float("inf"))["action"]
     ############################################################################
 
@@ -135,22 +154,31 @@ class ExpectimaxAgent(AdversialSearchAgent):
     (depth와 evaluation function은 위에서 정의한 self.depth and self.evaluationFunction을 사용할 것.)
   """
   def expactimax(self, state, depth, agent, maximize):
+    # Check terminal state
     if state.isWin() or state.isLose():
       return {
         "action": None,
         "score": self.evaluationFunction(state)
       }
     
-    best = {
+    # Init result
+    result = {
       "action" : None,
       "score" : 0 if agent else float("-inf"),      
     }
 
+    # Probability function
+    prob = lambda x: x//len(state.getLegalActions(agent))
+
+    # Iterate children of node
     for action in state.getLegalActions(agent):
+      # Generate new state
       new_state = state.generateSuccessor(agent, action)
+      # Maximizing agent
       if maximize:
         score = self.expactimax(new_state, depth, 1, False)["score"]
-        best["action"], best["score"] = [(best["action"], best["score"]), (action, score)][score > best["score"]]
+        result["action"], result["score"] = [(result["action"], result["score"]), (action, score)][score > result["score"]]
+      # Minimizing agent
       else:
         if agent >= state.getNumAgents() - 1:
           if depth == self.depth - 1:
@@ -159,15 +187,11 @@ class ExpectimaxAgent(AdversialSearchAgent):
             score = self.expactimax(new_state, depth + 1, 0, True)["score"]
         else:
           score = self.expactimax(new_state, depth, agent + 1, False)["score"]
-        best["score"] += score
-
-    if not maximize:
-      best["score"] /= len(state.getLegalActions(agent))
+        result["score"] += prob(score)
+    return result
     
-    return best
-    
-
   def Action(self, gameState):
     ####################### Write Your Code Here ################################
+    # Call expactimax
     return self.expactimax(gameState, 0 ,0, True)["action"]
     ############################################################################
