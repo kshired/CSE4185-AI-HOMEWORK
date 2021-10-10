@@ -51,7 +51,7 @@ class MinimaxAgent(AdversialSearchAgent):
   """
   def minimax(self, state, depth, agent, maximize):
     # Check terminal state
-    if state.isWin() or state.isLose():
+    if state.isWin() or state.isLose() or depth == self.depth:
       return {
         "action": None,
         "score": self.evaluationFunction(state)
@@ -74,10 +74,7 @@ class MinimaxAgent(AdversialSearchAgent):
       # Minimizing agent
       else:
         if agent >= state.getNumAgents() - 1:
-          if depth == self.depth - 1:
-            score = self.evaluationFunction(new_state)
-          else:
-            score = self.minimax(new_state, depth + 1, 0, True)["score"]
+          score = self.minimax(new_state, depth + 1, 0, True)["score"]
         else:
           score = self.minimax(new_state, depth, agent + 1, False)["score"]
         result["score"] = min(score, result["score"])
@@ -100,7 +97,7 @@ class AlphaBetaAgent(AdversialSearchAgent):
   """
   def alpha_beta(self, state, depth, agent, maximize, alpha, beta):
     # Check terminal state
-    if state.isWin() or state.isLose():
+    if state.isWin() or state.isLose() or depth == self.depth:
       return {
         "action": None,
         "score": self.evaluationFunction(state)
@@ -120,25 +117,22 @@ class AlphaBetaAgent(AdversialSearchAgent):
       if maximize:
         score = self.alpha_beta(new_state, depth, 1, False, alpha, beta)["score"]
         result["action"], result["score"] = [(result["action"], result["score"]), (action, score)][score > result["score"]]
-        alpha = max(alpha, result["score"])
         # Pruning
-        if result["score"] >= beta:
+        if result["score"] > beta:
           break
+        alpha = max(alpha, result["score"])
       # Minimizing agent
       else:
         if agent == state.getNumAgents() - 1:
-          if depth == self.depth - 1:
-            score = self.evaluationFunction(new_state)
-          else:
-            score = self.alpha_beta(new_state, depth + 1, 0, True, alpha, beta)["score"]
+          score = self.alpha_beta(new_state, depth + 1, 0, True, alpha, beta)["score"]
         else:
           score = self.alpha_beta(new_state, depth, agent + 1, False, alpha, beta)["score"]
         result["score"] = min(score, result["score"])
-        beta = min(beta, result["score"])
         # Pruning
-        if alpha >= result["score"]:
+        if alpha > result["score"]:
           break
-      return result
+        beta = min(beta, result["score"])
+    return result
 
   def Action(self, gameState):
     ####################### Write Your Code Here ################################
@@ -155,7 +149,7 @@ class ExpectimaxAgent(AdversialSearchAgent):
   """
   def expactimax(self, state, depth, agent, maximize):
     # Check terminal state
-    if state.isWin() or state.isLose():
+    if state.isWin() or state.isLose() or depth == self.depth:
       return {
         "action": None,
         "score": self.evaluationFunction(state)
@@ -164,11 +158,11 @@ class ExpectimaxAgent(AdversialSearchAgent):
     # Init result
     result = {
       "action" : None,
-      "score" : 0 if agent else float("-inf"),      
+      "score" : 0.0 if agent else float("-inf"),      
     }
 
     # Probability function
-    prob = lambda x: x//len(state.getLegalActions(agent))
+    prob = lambda x: x/len(state.getLegalActions(agent))
 
     # Iterate children of node
     for action in state.getLegalActions(agent):
@@ -181,10 +175,7 @@ class ExpectimaxAgent(AdversialSearchAgent):
       # Minimizing agent
       else:
         if agent >= state.getNumAgents() - 1:
-          if depth == self.depth - 1:
-            score = self.evaluationFunction(new_state)
-          else:
-            score = self.expactimax(new_state, depth + 1, 0, True)["score"]
+          score = self.expactimax(new_state, depth + 1, 0, True)["score"]
         else:
           score = self.expactimax(new_state, depth, agent + 1, False)["score"]
         result["score"] += prob(score)
