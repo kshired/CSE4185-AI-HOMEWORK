@@ -49,9 +49,12 @@ class MinimaxAgent(AdversialSearchAgent):
     [문제 01] MiniMax의 Action을 구현하시오. (20점)
     (depth와 evaluation function은 위에서 정의한 self.depth and self.evaluationFunction을 사용할 것.)
   """
+  def isTerminalState(self, state, depth):
+    return state.isWin() or state.isLose() or depth == self.depth
+
   def minimax(self, state, depth, agent, maximize):
     # Check terminal state
-    if state.isWin() or state.isLose() or depth == self.depth:
+    if self.isTerminalState(state, depth):
       return {
         "action": None,
         "score": self.evaluationFunction(state)
@@ -95,9 +98,12 @@ class AlphaBetaAgent(AdversialSearchAgent):
     [문제 02] AlphaBeta의 Action을 구현하시오. (25점)
     (depth와 evaluation function은 위에서 정의한 self.depth and self.evaluationFunction을 사용할 것.)
   """
+  def isTerminalState(self, state, depth):
+    return state.isWin() or state.isLose() or depth == self.depth
+    
   def alpha_beta(self, state, depth, agent, maximize, alpha, beta):
     # Check terminal state
-    if state.isWin() or state.isLose() or depth == self.depth:
+    if self.isTerminalState(state, depth):
       return {
         "action": None,
         "score": self.evaluationFunction(state)
@@ -147,9 +153,12 @@ class ExpectimaxAgent(AdversialSearchAgent):
     [문제 03] Expectimax의 Action을 구현하시오. (25점)
     (depth와 evaluation function은 위에서 정의한 self.depth and self.evaluationFunction을 사용할 것.)
   """
+  def isTerminalState(self, state, depth):
+    return state.isWin() or state.isLose() or depth == self.depth
+
   def expactimax(self, state, depth, agent, maximize):
     # Check terminal state
-    if state.isWin() or state.isLose() or depth == self.depth:
+    if self.isTerminalState(state, depth):
       return {
         "action": None,
         "score": self.evaluationFunction(state)

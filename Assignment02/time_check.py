@@ -1,25 +1,20 @@
-#!/usr/bin/env python3
-
 import time_info
 
 test = time_info.TimeCheck()
 hw02 = test.load('hw02')
 
-FINAL_GRADE = True
-SEED = 'testing'
-BIG_NEGATIVE = -10000
-
 from game import Agent
 from ghostAgents import RandomGhost, DirectionalGhost
-import random, math, traceback, sys, os
+import  sys
 
 import pacman, time, layout, textDisplay
 textDisplay.SLEEP_TIME = 0
 textDisplay.DRAW_EVERY = 1000
 thismodule = sys.modules[__name__]
 
+TIME_LIMIT = 3000
 
-def run(layname, pac, ghosts, nGames = 1):
+def run(layname, pac, ghosts, nGames =300):
 
   if test.fatalError:
     return {'time': 65536, 'wins': 0, 'games': None, 'scores': [0]*nGames, 'timeouts': nGames}
@@ -27,8 +22,7 @@ def run(layname, pac, ghosts, nGames = 1):
   lay = layout.getLayout(layname, 3)
   disp = textDisplay.NullGraphics()
 
-  games = pacman.runGames(lay, pac, ghosts, disp, nGames, False, catchExceptions=False)
-
+  games = pacman.runGames(lay, pac, ghosts, disp, nGames, False, numTraining =0,catchExceptions=False)
   stats = {'wins': [g.state.isWin() for g in games].count(True), 'games': games, 'scores': [g.state.getScore() for g in games], 'timeouts': [g.agentTimeout for g in games].count(True)}
 
   return stats
@@ -37,7 +31,7 @@ def run(layname, pac, ghosts, nGames = 1):
 def small_map(agentName):
   stats = {}
   if agentName == 'alphabeta':
-    stats = run('smallmap', hw02.AlphaBetaAgent(depth=3), [DirectionalGhost(i + 1) for i in range(2)])
+    stats = run('smallmap', hw02.AlphaBetaAgent(depth=2), [DirectionalGhost(i + 1) for i in range(2)])
   elif agentName == 'minimax':
     stats = run('smallmap', hw02.MinimaxAgent(depth=2), [DirectionalGhost(i + 1) for i in range(2)])
   else:
@@ -46,12 +40,10 @@ def small_map(agentName):
     test.fail('Your ' + agentName + ' agent timed out on smallmap.')
     return
 
-
-
 def medium_map(agentName):
   stats = {}
   if agentName == 'alphabeta':
-    stats = run('mediummap', hw02.AlphaBetaAgent(depth=3), [DirectionalGhost(i + 1) for i in range(2)])
+    stats = run('mediummap', hw02.AlphaBetaAgent(depth=2), [DirectionalGhost(i + 1) for i in range(2)])
   elif agentName == 'minimax':
     stats = run('mediummap', hw02.MinimaxAgent(depth=2), [DirectionalGhost(i + 1) for i in range(2)])
   else:
@@ -60,18 +52,28 @@ def medium_map(agentName):
     test.fail('Your ' + agentName + ' agent timed out on mediummap.')
     return
 
+def minimax_map(agentName):
+  stats = {}
+  if agentName == 'alphabeta':
+    stats = run('minimaxmap', hw02.AlphaBetaAgent(depth=4), [DirectionalGhost(i + 1) for i in range(2)],1000)
+  elif agentName == 'minimax':
+    stats = run('minimaxmap', hw02.MinimaxAgent(depth=4), [DirectionalGhost(i + 1) for i in range(2)],1000)
+  else:
+    stats = run('minimaxmap', hw02.ExpectimaxAgent(depth=4), [DirectionalGhost(i + 1) for i in range(2)],1000)
+  if stats['timeouts'] > 0:
+    test.fail('Your ' + agentName + ' agent timed out on minimaxmap.')
+    return
 
 
 
-maxSeconds = 5
+#test.addTest('MiniMax (depth=2) For Small Map', lambda : small_map('minimax'), maxSeconds=TIME_LIMIT, description='MiniMax for timeout on smallMap.')
+#test.addTest('AlphaBeta (depth=2) For Small Map', lambda : small_map('alphabeta'), maxSeconds=TIME_LIMIT, description='AlphaBeta for timeout on smallMap.')
 
-test.addTest('MiniMax For Small Map', lambda : small_map('minimax'), maxSeconds=maxSeconds, description='MiniMax for timeout on smallMap.')
-test.addTest('AlphaBeta For Small Map', lambda : small_map('alphabeta'), maxSeconds=maxSeconds, description='AlphaBeta for timeout on smallMap.')
+#test.addTest('MiniMax (depth=2) For Medium Map', lambda : medium_map('minimax'), maxSeconds=TIME_LIMIT, description='MiniMax for timeout on mediumMap.')
+#test.addTest('AlphaBeta (depth=2) For Medium Map', lambda : medium_map('alphabeta'), maxSeconds=TIME_LIMIT, description='AlphaBeta for timeout on mediumMap.')
 
-test.addTest('MiniMax For Medium Map', lambda : medium_map('minimax'), maxSeconds=maxSeconds, description='MiniMax for timeout on mediumMap.')
-test.addTest('AlphaBeta For Medium Map', lambda : medium_map('alphabeta'), maxSeconds=maxSeconds, description='AlphaBeta for timeout on mediumMap.')
-
-
+#test.addTest('MiniMax (depth=4) For Minimax Map', lambda : minimax_map('minimax'), maxSeconds=TIME_LIMIT, description='MiniMax for timeout on minimaxMap.')
+#test.addTest('AlphaBeta (depth=4) For Minimax Map', lambda : minimax_map('alphabeta'), maxSeconds=TIME_LIMIT, description='AlphaBeta for timeout on minimaxMap.')
 
 
 test.start()

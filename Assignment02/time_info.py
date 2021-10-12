@@ -2,7 +2,6 @@
 import datetime, signal, os
 import gc
 
-defaultMaxSeconds = 5
 
 class TimeoutFunctionException(Exception):
     pass
@@ -46,14 +45,9 @@ class Part:
 class TimeCheck:
     def __init__(self):
         self.parts = []
-        self.useSolution = False
-
-        self.messages = []
-        self.currentPart = None
         self.fatalError = False
 
-
-    def addTest(self, agentname, gradeFunc, maxSeconds=defaultMaxSeconds,description=""):
+    def addTest(self, agentname, gradeFunc, maxSeconds,description=""):
 
         self.assertNewNumber(agentname)
         part = Part(agentname, gradeFunc,  maxSeconds,description)
@@ -77,12 +71,10 @@ class TimeCheck:
             return None
 
     def timePart(self, part):
+
         print('----- START PART  %s: ' % (part.number))
         print()
 
-        self.currentPart = part
-
-        startTime = datetime.datetime.now()
         try:
             TimeoutFunction(part.gradeFunc, part.maxSeconds)()
         except KeyboardInterrupt:
@@ -99,12 +91,10 @@ class TimeCheck:
             self.fail('Exception thrown: %s -- %s' % (str(type(e)), str(e)))
         except SystemExit as e:
             self.fail('Unexpected exit.')
-        endTime = datetime.datetime.now()
-        part.seconds = (endTime - startTime).seconds
 
-        print('----- Execute Time  %s (최대 %s seconds 허용)]' % (endTime - startTime, part.maxSeconds))
-        print()
-        return endTime - startTime
+        print('----- END  %s ' % (part.number))
+        print('')
+
 
 
     def start(self):
@@ -115,8 +105,5 @@ class TimeCheck:
             parts.append(part)
         print()
         print('=============================== START TIME CHECK ========================================')
-        times = []
         for part in parts:
-            times.append(self.timePart(part))
-        
-        print(times[0] > times[1], times[2] > times[3])
+            self.timePart(part)

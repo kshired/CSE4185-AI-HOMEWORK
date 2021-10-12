@@ -475,8 +475,9 @@ class Game:
     sys.stdout = OLD_STDOUT
     sys.stderr = OLD_STDERR
 
+  def run(self, sub_time):
 
-  def run( self ):
+    start_time=time.time()
 
     self.display.initialize(self.state.data)
     self.numMoves = 0
@@ -626,6 +627,8 @@ class Game:
           return
     self.display.finish()
 
+    end_time=time.time()
 
+    sub_time = end_time - start_time
 
-
+    return sub_time

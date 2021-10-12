@@ -510,9 +510,11 @@ def replayGame( layout, actions, display ):
 def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0, catchExceptions=False, timeout=30 ):
   import __main__
   __main__.__dict__['_display'] = display
-
+  print(ghosts)
   rules = ClassicGameRules(timeout)
   games = []
+  sub_time=0
+  total_time=0
 
   for i in range( numGames ):
     beQuiet = i < numTraining
@@ -525,7 +527,9 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
         gameDisplay = display
         rules.quiet = False
     game = rules.newGame(layout, pacman, ghosts, gameDisplay, beQuiet, catchExceptions)
-    game.run()
+
+    total_time+=game.run(sub_time)
+
     if not beQuiet: games.append(game)
 
     if record:
@@ -537,6 +541,7 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
       f.close()
 
   if (numGames-numTraining) > 0:
+
     scores = [game.state.getScore() for game in games]
     wins = [game.state.isWin() for game in games]
     winRate = wins.count(True)/ float(len(wins))
@@ -546,6 +551,10 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
     print('Record:', ', '.join([ ['Lose', 'Win'][int(w)] for w in wins]))
     print('')
     print(("Win Rate: %d%% (%d/%d)" % (winRate * 100, wins.count(True), len(wins))))
+
+    print('Total Time:', total_time)
+    print('Average Time:',total_time/numGames)
+
     print("======================================")
 
   return games
