@@ -156,7 +156,7 @@ class ExpectimaxAgent(AdversialSearchAgent):
   def isTerminalState(self, state, depth):
     return state.isWin() or state.isLose() or depth == self.depth
 
-  def expactimax(self, state, depth, agent, maximize):
+  def expectimax(self, state, depth, agent, maximize):
     # Check terminal state
     if self.isTerminalState(state, depth):
       return {
@@ -179,19 +179,19 @@ class ExpectimaxAgent(AdversialSearchAgent):
       new_state = state.generateSuccessor(agent, action)
       # Maximizing agent
       if maximize:
-        score = self.expactimax(new_state, depth, 1, False)["score"]
+        score = self.expectimax(new_state, depth, 1, False)["score"]
         result["action"], result["score"] = [(result["action"], result["score"]), (action, score)][score > result["score"]]
       # Minimizing agent
       else:
         if agent >= state.getNumAgents() - 1:
-          score = self.expactimax(new_state, depth + 1, 0, True)["score"]
+          score = self.expectimax(new_state, depth + 1, 0, True)["score"]
         else:
-          score = self.expactimax(new_state, depth, agent + 1, False)["score"]
+          score = self.expectimax(new_state, depth, agent + 1, False)["score"]
         result["score"] += prob(score)
     return result
     
   def Action(self, gameState):
     ####################### Write Your Code Here ################################
-    # Call expactimax
-    return self.expactimax(gameState, 0 ,0, True)["action"]
+    # Call expectimax
+    return self.expectimax(gameState, 0 ,0, True)["action"]
     ############################################################################
