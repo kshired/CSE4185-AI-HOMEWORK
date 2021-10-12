@@ -66,14 +66,14 @@ def minimax_map(agentName):
 
 
 
-#test.addTest('MiniMax (depth=2) For Small Map', lambda : small_map('minimax'), maxSeconds=TIME_LIMIT, description='MiniMax for timeout on smallMap.')
-#test.addTest('AlphaBeta (depth=2) For Small Map', lambda : small_map('alphabeta'), maxSeconds=TIME_LIMIT, description='AlphaBeta for timeout on smallMap.')
+test.addTest('MiniMax (depth=2) For Small Map', lambda : small_map('minimax'), maxSeconds=TIME_LIMIT, description='MiniMax for timeout on smallMap.')
+test.addTest('AlphaBeta (depth=2) For Small Map', lambda : small_map('alphabeta'), maxSeconds=TIME_LIMIT, description='AlphaBeta for timeout on smallMap.')
 
-#test.addTest('MiniMax (depth=2) For Medium Map', lambda : medium_map('minimax'), maxSeconds=TIME_LIMIT, description='MiniMax for timeout on mediumMap.')
-#test.addTest('AlphaBeta (depth=2) For Medium Map', lambda : medium_map('alphabeta'), maxSeconds=TIME_LIMIT, description='AlphaBeta for timeout on mediumMap.')
+test.addTest('MiniMax (depth=2) For Medium Map', lambda : medium_map('minimax'), maxSeconds=TIME_LIMIT, description='MiniMax for timeout on mediumMap.')
+test.addTest('AlphaBeta (depth=2) For Medium Map', lambda : medium_map('alphabeta'), maxSeconds=TIME_LIMIT, description='AlphaBeta for timeout on mediumMap.')
 
-#test.addTest('MiniMax (depth=4) For Minimax Map', lambda : minimax_map('minimax'), maxSeconds=TIME_LIMIT, description='MiniMax for timeout on minimaxMap.')
-#test.addTest('AlphaBeta (depth=4) For Minimax Map', lambda : minimax_map('alphabeta'), maxSeconds=TIME_LIMIT, description='AlphaBeta for timeout on minimaxMap.')
+test.addTest('MiniMax (depth=4) For Minimax Map', lambda : minimax_map('minimax'), maxSeconds=TIME_LIMIT, description='MiniMax for timeout on minimaxMap.')
+test.addTest('AlphaBeta (depth=4) For Minimax Map', lambda : minimax_map('alphabeta'), maxSeconds=TIME_LIMIT, description='AlphaBeta for timeout on minimaxMap.')
 
 
 test.start()

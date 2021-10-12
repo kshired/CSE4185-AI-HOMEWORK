@@ -124,7 +124,7 @@ class AlphaBetaAgent(AdversialSearchAgent):
         score = self.alpha_beta(new_state, depth, 1, False, alpha, beta)["score"]
         result["action"], result["score"] = [(result["action"], result["score"]), (action, score)][score > result["score"]]
         # Pruning
-        if result["score"] > beta:
+        if result["score"] >= beta:
           break
         alpha = max(alpha, result["score"])
       # Minimizing agent
@@ -135,7 +135,7 @@ class AlphaBetaAgent(AdversialSearchAgent):
           score = self.alpha_beta(new_state, depth, agent + 1, False, alpha, beta)["score"]
         result["score"] = min(score, result["score"])
         # Pruning
-        if alpha > result["score"]:
+        if alpha >= result["score"]:
           break
         beta = min(beta, result["score"])
     return result
