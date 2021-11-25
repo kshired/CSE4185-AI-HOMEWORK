@@ -4,7 +4,7 @@
 
 
 ## HW-1
-[코드](./Assignment01)
+[코드](./Assignment01/search.py)
 
 [보고서](./Assignment01/AI_Assignment01_보고서.pdf)
 
@@ -14,7 +14,7 @@ stage3 big을 제외하고 모두 통과하였고, 최종점수는 110점 만점
 
 
 ## HW-2
-[코드](./Assignment02)
+[코드](./Assignment02/hw02.py)
 
 [보고서](./Assignment02/AI_Assignment02_보고서.pdf)
 
@@ -24,7 +24,7 @@ Pacman game을 mimax, alpha beta pruning 그리고 expecti-minimax 알고리즘�
 
 
 ## HW-3
-[코드](./Assignment03)
+[코드](./Assignment03/hw03.py)
 
 [보고서](./Assignment03/AI03_보고서_20171612.pdf)
 
